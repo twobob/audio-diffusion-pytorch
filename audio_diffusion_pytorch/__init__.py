@@ -18,25 +18,19 @@ from .diffusion import (
     VKDiffusion,
     VKDistribution,
     VSampler,
+    XDiffusion,
 )
 from .model import (
     AudioDiffusionAutoencoder,
     AudioDiffusionConditional,
     AudioDiffusionModel,
+    AudioDiffusionUpphaser,
     AudioDiffusionUpsampler,
+    AudioDiffusionVocoder,
     DiffusionAutoencoder1d,
+    DiffusionUpphaser1d,
     DiffusionUpsampler1d,
+    DiffusionVocoder1d,
     Model1d,
 )
-from .modules import (
-    AutoEncoder1d,
-    Decoder1d,
-    Encoder1d,
-    MultiEncoder1d,
-    Noiser,
-    T5Embedder,
-    Tanh,
-    UNet1d,
-    UNetConditional1d,
-    Variational,
-)
+from .modules import T5Embedder, UNet1d, UNetConditional1d

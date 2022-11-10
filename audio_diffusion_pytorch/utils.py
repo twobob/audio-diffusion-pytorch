@@ -1,6 +1,6 @@
-import math
 from functools import reduce
 from inspect import isfunction
+from math import ceil, floor, log2, pi
 from typing import Callable, Dict, List, Optional, Sequence, Tuple, TypeVar, Union
 
 import torch
@@ -42,6 +42,13 @@ def prod(vals: Sequence[int]) -> int:
     return reduce(lambda x, y: x * y, vals)
 
 
+def closest_power_2(x: float) -> int:
+    exponent = log2(x)
+    distance_fn = lambda z: abs(x - 2 ** z)  # noqa
+    exponent_closest = min((floor(exponent), ceil(exponent)), key=distance_fn)
+    return 2 ** int(exponent_closest)
+
+
 """
 Kwargs Utils
 """
@@ -55,10 +62,16 @@ def group_dict_by_prefix(prefix: str, d: Dict) -> Tuple[Dict, Dict]:
     return return_dicts
 
 
-def groupby_kwargs_prefix(prefix: str, d: Dict) -> Tuple[Dict, Dict]:
+def groupby(prefix: str, d: Dict, keep_prefix: bool = False) -> Tuple[Dict, Dict]:
     kwargs_with_prefix, kwargs = group_dict_by_prefix(prefix, d)
+    if keep_prefix:
+        return kwargs_with_prefix, kwargs
     kwargs_no_prefix = {k[len(prefix) :]: v for k, v in kwargs_with_prefix.items()}
     return kwargs_no_prefix, kwargs
+
+
+def prefix_dict(prefix: str, d: Dict) -> Dict:
+    return {prefix + str(k): v for k, v in d.items()}
 
 
 """
@@ -79,10 +92,10 @@ def resample(
     d = dict(device=waveforms.device, dtype=waveforms.dtype)
 
     base_factor = min(factor_in, factor_out) * rolloff
-    width = math.ceil(lowpass_filter_width * factor_in / base_factor)
+    width = ceil(lowpass_filter_width * factor_in / base_factor)
     idx = torch.arange(-width, width + factor_in, **d)[None, None] / factor_in  # type: ignore # noqa
     t = torch.arange(0, -factor_out, step=-1, **d)[:, None, None] / factor_out + idx  # type: ignore # noqa
-    t = (t * base_factor).clamp(-lowpass_filter_width, lowpass_filter_width) * math.pi
+    t = (t * base_factor).clamp(-lowpass_filter_width, lowpass_filter_width) * pi
 
     window = torch.cos(t / lowpass_filter_width / 2) ** 2
     scale = base_factor / factor_in
